@@ -6,9 +6,9 @@ spring:
     name: shopstack-backend
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:shopstack}
-    username: postgres
-    password: 0080
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?sslmode=require
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -24,6 +24,9 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      ssl:
+        enabled: ${REDIS_SSL:true}
 
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
@@ -42,10 +45,12 @@ app:
     secret: ${JWT_SECRET:change-this-to-a-long-random-secret-in-prod-min-256-bits}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
     refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
+
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:5174}
 
 razorpay:
-  key-id: rzp_test_TKA6oBYk9VOvJF
-  key-secret: y1RelIItGLsUrumBkURYD6at
+  key-id: ${RAZORPAY_KEY_ID}
+  key-secret: ${RAZORPAY_KEY_SECRET}
