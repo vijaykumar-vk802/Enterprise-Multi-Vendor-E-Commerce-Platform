@@ -7,7 +7,15 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * JPA Configuration for Spring Data Repositories.
- * Configures entity manager factory, transaction manager, and repository scanning.
+ * 
+ * This configuration:
+ * - Enables JPA repositories scanning
+ * - Configures entity manager factory and transaction manager references
+ * - Enables transaction management
+ * - Scans for entities in specified packages
+ * 
+ * Spring Boot auto-configures the entityManagerFactory and transactionManager
+ * beans based on datasource and application.yml JPA configuration.
  */
 @Configuration
 @EnableJpaRepositories(
@@ -18,6 +26,5 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EntityScan(basePackages = {"com.shopstack.entity", "com.shopstack.model"})
 @EnableTransactionManagement
 public class JpaConfig {
-    // Spring Boot auto-configures entityManagerFactory and transactionManager
-    // based on application.yml configuration
+    // Configuration is complete - Spring Boot handles bean creation
 }
