@@ -8,7 +8,8 @@ services:
     environment:
       POSTGRES_DB: shopstack
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 0080
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
     ports:
       - "5432:5432"
     volumes:
