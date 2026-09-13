@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: shopstack-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:shopstack}
+      POSTGRES_USER: ${DB_USERNAME:postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "${DB_PORT:5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:postgres} -d ${DB_NAME:shopstack}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shopstack-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: shopstack-redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:}
+    ports:
+      - "${REDIS_PORT:6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shopstack-network
+
+  shopstack-backend:
+    build:
+      context: ./shopstack-backend
+      dockerfile: Dockerfile
+    container_name: shopstack-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:shopstack}
+      DB_USERNAME: ${DB_USERNAME:postgres}
+      DB_PASSWORD: ${DB_PASSWORD:password}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:}
+      REDIS_SSL: false
+      JWT_SECRET: ${JWT_SECRET:change-this-to-a-long-random-secret-in-prod-min-256-bits}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:86400000}
+      JWT_REFRESH_EXPIRATION_MS: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+      FRONTEND_URL: ${FRONTEND_URL:http://localhost:5173}
+      CORS_ORIGINS: ${CORS_ORIGINS:http://localhost:5173,http://localhost:5174}
+      MAIL_HOST: ${MAIL_HOST:smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:587}
+      MAIL_USERNAME: ${MAIL_USERNAME:}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./shopstack-backend/src:/app/src
+    networks:
+      - shopstack-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  shopstack-network:
+    driver: bridge
